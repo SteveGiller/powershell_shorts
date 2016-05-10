@@ -1,0 +1,31 @@
+#Push logon data to Azure NOSQL table
+
+Param(  [String] $hostname,
+        [String] $clienttype,
+        [String] $username,
+        [String] $ip,
+        [String] $tunneled,
+        [String] $eventType,
+        [String] $key )
+
+$date = Get-Date -format yyyyMMdd
+$guid = [guid]::NewGuid()
+$time = Get-Date -format HH:mm:ss
+$Ctx = New-AzureStorageContext azurepowershelltest -StorageAccountKey $key
+
+$entity = New-Object -TypeName Microsoft.WindowsAzure.Storage.Table.DynamicTableEntity -ArgumentList $date, $guid
+$entity.Properties.Add("HostName", $hostname)
+$entity.Properties.Add("Time", $time)
+$entity.Properties.Add("Username", $username)
+$entity.Properties.Add("ClientType", $clienttype)
+$entity.Properties.Add("IPAddress", $ip)
+$entity.Properties.Add("Tunnel", $tunneled)
+$entity.Properties.Add("EventType", $eventType)
+
+$table = Get-AzureStorageTable -Name logoninfo -Context $Ctx -ErrorAction Ignore
+if($table -eq $null) { $table = New-AzureStorageTable -Name logoninfo -Context $Ctx }
+$result = $table.CloudTable.Execute([Microsoft.WindowsAzure.Storage.Table.TableOperation]::Insert($entity))
+$query = New-Object "Microsoft.WindowsAzure.Storage.Table.TableQuery"
+$data = $table.CloudTable.ExecuteQuery($query)
+
+Write-Host $data.Properties.HostName.PropertyAsObject $data.Properties.Time.PropertyAsObject $data.Properties.Username.PropertyAsObject $data.Properties.ClientType.PropertyAsObject $data.Properties.IPAddress.PropertyAsObject $data.Properties.Tunnel.PropertyAsObject $data.Properties.EventType.PropertyAsObject
