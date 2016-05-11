@@ -1,0 +1,6 @@
+#Invoke Command (Remote session)
+
+$s = New-PSSession -ComputerName "SRV1"
+Invoke-Command -Session $s -ScriptBlock {$services = Get-Service}
+Invoke-Command -Session $s -ScriptBlock {$services | Where-Object {$_.Status -eq "Stopped"}}
+Remove-PSSession $s
