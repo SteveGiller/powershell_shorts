@@ -1,0 +1,7 @@
+#Connect to Remote session to app server
+
+$session = New-PSSession -Computername "dc-rapp-con-02"
+Invoke-Command -Session $session -ScriptBlock { Get-RDRemoteApp }
+
+#List name and user groups with access
+Invoke-Command -Session $session -ScriptBlock { Get-RDRemoteApp | ForEach-Object { Write-Host $_.DisplayName $_.UserGroups } }
