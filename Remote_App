@@ -1,0 +1,4 @@
+#Connect to Remote session to app server
+
+$session = New-PSSession -Computername "dc-rapp-con-02"
+Invoke-Command -Session $session -ScriptBlock { Get-RDRemoteApp }
